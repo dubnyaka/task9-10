@@ -2,8 +2,8 @@ import React, {Component} from "react";
 import Button from '@mui/material/Button';
 import {evaluate} from 'mathjs'
 
-class App extends Component {
 
+class App extends Component {
 
     constructor(props) {
         super(props);
@@ -15,13 +15,13 @@ class App extends Component {
         };
     }
 
-
     render() {
+        const {
+            studentsState
+        } = this.props;
+
         const expression = this.state.firstOperand + this.state.operator + this.state.secondOperand;
         const history = this.state.history.map((historyObj, index) =>
-            //style={"font-weight: bold; font-size: x-large;"}
-            // style={{"font-weight": "bold", "font-size": "x-large"}}
-
             <li
                 style={index === this.state.history.length-1 ? {fontWeight: "bold", fontSize: "x-large"} : {}}
                 key={index}>{historyObj}
@@ -58,12 +58,35 @@ class App extends Component {
         }
 
         const calc = () => {
+
+            if ((this.state.firstOperand === '0' || this.state.secondOperand === '0')
+            && this.state.operator === ' / '){
+                let result_value = "Error division by zero"
+                addToHistory(expression + " = " + result_value)
+                this.setState({firstOperand: "",secondOperand: "", operator: ""})
+                return
+            }
+
             if (this.state.firstOperand && this.state.operator && this.state.secondOperand) {
                 let result_value = evaluate(expression)
                 this.setState({firstOperand: result_value})
                 this.setState({secondOperand: "", operator: ""})
                 addToHistory(expression + " = " + result_value)
             }
+        }
+
+
+
+        const getAndSolve = () => {
+            const url = "http://localhost:8080/math/examples?count=5";
+            let rawExamples;
+            fetch(url)
+                .then(
+                    response => response.json() // .json(), .blob(), etc.
+                ).then(
+                text => console.log(text[0])// Handle here
+            );
+
         }
 
         return (
@@ -80,6 +103,9 @@ class App extends Component {
                         </Button>)}
                     <Button style={{width: '100px'}} onClick={calc} variant="contained" color="success">
                         =
+                    </Button>
+                    <Button style={{width: '100px'}} onClick={getAndSolve} variant="contained" color="success">
+                        Получить и решить примеры
                     </Button>
                 </div>
 
