@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 import Button from '@mui/material/Button';
 import {evaluate} from 'mathjs'
+import {connect, useDispatch} from "react-redux";
+import {createStore} from "redux";
 
 
 class App extends Component {
@@ -16,14 +18,17 @@ class App extends Component {
     }
 
     render() {
+
         const {
-            studentsState
+            bankState,
+            studentsState,
         } = this.props;
+
 
         const expression = this.state.firstOperand + this.state.operator + this.state.secondOperand;
         const history = this.state.history.map((historyObj, index) =>
             <li
-                style={index === this.state.history.length-1 ? {fontWeight: "bold", fontSize: "x-large"} : {}}
+                style={index === this.state.history.length - 1 ? {fontWeight: "bold", fontSize: "x-large"} : {}}
                 key={index}>{historyObj}
             </li>
         );
@@ -60,10 +65,10 @@ class App extends Component {
         const calc = () => {
 
             if ((this.state.firstOperand === '0' || this.state.secondOperand === '0')
-            && this.state.operator === ' / '){
+                && this.state.operator === ' / ') {
                 let result_value = "Error division by zero"
                 addToHistory(expression + " = " + result_value)
-                this.setState({firstOperand: "",secondOperand: "", operator: ""})
+                this.setState({firstOperand: "", secondOperand: "", operator: ""})
                 return
             }
 
@@ -76,10 +81,8 @@ class App extends Component {
         }
 
 
-
         const getAndSolve = () => {
             const url = "http://localhost:8080/math/examples?count=5";
-            let rawExamples;
             fetch(url)
                 .then(
                     response => response.json() // .json(), .blob(), etc.
@@ -87,6 +90,16 @@ class App extends Component {
                 text => console.log(text[0])// Handle here
             );
 
+
+            // bankState.dispatch({type:'ADD_CASH', payload: 5})
+
+
+            this.props.dispatch({
+                type: 'ADD_CASH',
+                payload: 100,
+            })
+
+            console.log(this.props)
         }
 
         return (
@@ -121,5 +134,14 @@ class App extends Component {
         );
     }
 }
+const mapReduxStateToProps = reduxState => ({
+    bankState: reduxState.bank,
+    studentsState: reduxState.students,
+});
 
-export default App;
+const mapDispatchToProps = dispatch => ({
+    dispatch,
+});
+
+export default connect(mapReduxStateToProps, mapDispatchToProps)(App);
+// export default App;

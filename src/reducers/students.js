@@ -1,6 +1,6 @@
 const initialState = {
     isLoading: false,
-    list: ["student1"],
+    list: [],
     name: "This is Students!!!!!",
 };
 export default (state = initialState, action) => {
