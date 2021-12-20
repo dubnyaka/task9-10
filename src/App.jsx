@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 import Button from '@mui/material/Button';
 import {evaluate} from 'mathjs'
-import {connect, useDispatch} from "react-redux";
-import {createStore} from "redux";
+import {connect} from "react-redux";
+import {waitFor} from "@babel/core/lib/gensync-utils/async";
 
 
 class App extends Component {
@@ -20,12 +20,12 @@ class App extends Component {
     render() {
 
         const {
-            bankState,
-            studentsState,
+            mathExamples,
         } = this.props;
 
 
-        const expression = this.state.firstOperand + this.state.operator + this.state.secondOperand;
+        let expression = this.state.firstOperand + this.state.operator + this.state.secondOperand;
+
         const history = this.state.history.map((historyObj, index) =>
             <li
                 style={index === this.state.history.length - 1 ? {fontWeight: "bold", fontSize: "x-large"} : {}}
@@ -64,19 +64,19 @@ class App extends Component {
 
         const calc = () => {
 
-            if ((this.state.firstOperand === '0' || this.state.secondOperand === '0')
-                && this.state.operator === ' / ') {
-                let result_value = "Error division by zero"
-                addToHistory(expression + " = " + result_value)
-                this.setState({firstOperand: "", secondOperand: "", operator: ""})
-                return
-            }
-
             if (this.state.firstOperand && this.state.operator && this.state.secondOperand) {
                 let result_value = evaluate(expression)
-                this.setState({firstOperand: result_value})
-                this.setState({secondOperand: "", operator: ""})
-                addToHistory(expression + " = " + result_value)
+                if (result_value === Infinity || isNaN(result_value)) {
+                    result_value = "Error division by zero"
+                    addToHistory(expression + " = " + result_value)
+                    this.setState({firstOperand: "", secondOperand: "", operator: ""})
+                    return
+                } else {
+                    this.setState({firstOperand: result_value})
+                    this.setState({secondOperand: "", operator: ""})
+                    if(result_value === 0) this.setState({firstOperand : ''});
+                    addToHistory(expression + " = " + result_value)
+                }
             }
         }
 
@@ -87,19 +87,23 @@ class App extends Component {
                 .then(
                     response => response.json() // .json(), .blob(), etc.
                 ).then(
-                text => console.log(text[0])// Handle here
+                mathExamples => {
+                    this.props.dispatch({
+                        type: 'RECEIVE_MATH_EXAMPLES',
+                        mathExamples: mathExamples,
+                    })
+                }// Handle here
             );
+            let resultArr = []
+            this.props.mathExamplesState.list.forEach((mathExample) => {
 
-
-            // bankState.dispatch({type:'ADD_CASH', payload: 5})
-
-
-            this.props.dispatch({
-                type: 'ADD_CASH',
-                payload: 100,
+                let result = evaluate(mathExample)
+                if (result === Infinity || isNaN(result)) {
+                    result = "Error division by zero"
+                }
+                resultArr.push(mathExample + " = " + result)
             })
-
-            console.log(this.props)
+            this.setState({history:  [...this.state.history , ...resultArr]})
         }
 
         return (
@@ -134,9 +138,9 @@ class App extends Component {
         );
     }
 }
+
 const mapReduxStateToProps = reduxState => ({
-    bankState: reduxState.bank,
-    studentsState: reduxState.students,
+    mathExamplesState: reduxState.mathExamples,
 });
 
 const mapDispatchToProps = dispatch => ({

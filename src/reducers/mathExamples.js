@@ -1,24 +1,23 @@
 const initialState = {
     isLoading: false,
     list: [],
-    name: "This is Students!!!!!",
 };
 export default (state = initialState, action) => {
     switch (action.type) {
-        case 'REQUEST_STUDENTS': {
+        case 'REQUEST_MATH_EXAMPLES': {
             return {
                 ...state,
                 isLoading: true,
             };
         }
-        case 'RECEIVE_STUDENTS': {
+        case 'RECEIVE_MATH_EXAMPLES': {
             const {
-                students,
+                mathExamples,
             } = action;
             return {
                 ...state,
                 isLoading: false,
-                list: students,
+                list: mathExamples,
             };
         }
         default: return state;

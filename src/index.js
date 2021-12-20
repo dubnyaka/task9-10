@@ -3,12 +3,10 @@ import ReactDOM from "react-dom";
 import App from "./App.jsx";
 import {combineReducers, createStore} from "redux";
 import { Provider } from 'react-redux';
-import bankReducer from './reducers/bank'
-import studentsReducer from './reducers/students'
+import mathExamplesReducer from './reducers/mathExamples'
 
 const resultReducer = combineReducers({
-    bank:bankReducer,
-    students: studentsReducer,
+    mathExamples: mathExamplesReducer,
 })
 const store = createStore(resultReducer)
 
